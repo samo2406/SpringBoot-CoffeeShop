@@ -27,18 +27,21 @@ public class OrderService {
 		return orderRepository.save(order);  
 	}
 	
-	public OrderModel createOrder(OrderModel order) {	
+	public OrderModel createOrder(OrderModel order) {
+		// Creates a HTTP header with content type set to JSON, in order to include the created order with the request
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<OrderModel> request = new HttpEntity<>(order, headers);
 		
 		RestTemplate restTemplate = new RestTemplate();
+		// Calls a POST request to notify the barista service, including the new order
 	    restTemplate.postForEntity("http://localhost:8080/barista/processOrder", request, null);
 		return orderRepository.save(order);
 	}
 	
 	public void cancelOrder(int orderNumber) {
 		OrderModel order = this.getOrder(orderNumber);
+		// An order, which is already in preparation, cannot be cancelled
 		if (order.getPreparationState().toString() == "waiting") {
 			orderRepository.deleteById(orderNumber);
 		} 
